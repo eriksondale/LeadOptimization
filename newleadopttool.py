@@ -67,7 +67,7 @@ with open(arg[2],"r") as rxnFile:
 
 reactants = []
 reactants.append(lead)
-products = validRxn(reactants, rxn)
+products = validRxn(reactants, rxn, rxnReversed)
 
 if products is None:
 	print("Reaction not applicable to lead...")
@@ -92,7 +92,7 @@ with open(arg[3],"r") as smallMolFile:
         tempMol = Chem.MolFromSmiles(line)
 	reactants = []
 	reactants.append(tempMol)
-        tempProducts = validRxn(reactants, rxn)
+        tempProducts = validRxn(reactants, rxn, rxnReversed)
         for products in tempProducts:
                 fragList.append(products)
 
@@ -114,7 +114,7 @@ print("Optimizing Lead....")
 with open("optimizedLeads.smi","a") as leadFile:
     for frag in fragList:
         try:
-            newLead = rxnReversed.RunReactants([scaffold, frag],rxnReversed)
+            newLead = rxnReversed.RunReactants([scaffold, frag])
             for leads in newLead:
                     try:
                         Chem.SanitizeMol(leads)
