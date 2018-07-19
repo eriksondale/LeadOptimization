@@ -1,5 +1,3 @@
-
-
 #Note this is just a simple linear approach to get preliminary results
 # it can easily be expanded upon to get more quality leads
 
@@ -19,15 +17,17 @@ from rdkit.Chem import Descriptors
 from rdkit.Chem import rdchem
 import sys
 from sys import argv as arg
+from rdkit.Chem.Fingerprints import FingerprintMols
+from rdkit import DataStructs
 
 # Reaction checker
 def validRxn(reactant, reaction, revRxn):
 	try:
 		product = None
 		product = reaction.RunReactants([reactant])
-		print("Reaction was tested...")
+		#print("Reaction was tested...")
 		if(len(product) == 0):
-			print('Product is None')
+			#print('Product is None')
 			return None
 		else:
 			#reverseReactionPlan = reactionPlan[reactionPlan.find('>>')+2:] + '>>' + reactionPlan[0:reactionPlan.find('>>')]
@@ -37,12 +37,15 @@ def validRxn(reactant, reaction, revRxn):
 					revReactant = revRxn.RunReactants(prod)
 					for pairs in revReactant:
 						for molecule in pairs:
+								#print(Chem.MolToSmiles(molecule))
 								moleculeBit = FingerprintMols.FingerprintMol(molecule)
 								compoundBit= FingerprintMols.FingerprintMol(reactant)
 								similarity = DataStructs.FingerprintSimilarity(moleculeBit, compoundBit)
+								#print(similarity)
 								if(similarity == 1): # Rxn is valid b/c product and reverse product is found to be same
 									return prod
-				except:
+				except Exception as e:
+					print(e)
 					pass
 		  	print("reactant not reformed")
 			return None
@@ -58,10 +61,11 @@ with open(arg[1],"r") as leadFile:
 # Rxn
 with open(arg[2],"r") as rxnFile:
     rxnText = rxnFile.read()
+    rxnText = rxnText.strip('\n')
     rxn = Chem.AllChem.ReactionFromSmarts(rxnText)
-	print("Reacation: " + rxnText)
+    print("Reaction: " + rxnText)
     rxnReversed = Chem.AllChem.ReactionFromSmarts(rxnText[rxnText.find('>>')+2:] + '>>' + rxnText[0:rxnText.find('>>')])
-	print("Reversed Reaction: " + rxnText[rxnText.find('>>')+2:] + '>>' + rxnText[0:rxnText.find('>>')])
+    print("Reversed Reaction: " + rxnText[rxnText.find('>>')+2:] + '>>' + rxnText[0:rxnText.find('>>')])
     rxnFile.close()
 
 products = validRxn(lead, rxn, rxnReversed)
@@ -87,11 +91,10 @@ fragList = []
 with open(arg[3],"r") as smallMolFile:
     for line in smallMolFile:
         tempMol = Chem.MolFromSmiles(line)
-	reactants = []
-	reactants.append(tempMol)
-        tempProducts = validRxn(reactants, rxn, rxnReversed)
-        for products in tempProducts:
-                fragList.append(products)
+        tempProducts = validRxn(tempMol, rxn, rxnReversed)
+	if tempProducts is not None:
+        	for products in tempProducts:
+                	fragList.append(products)
 
 # Saving Fragments for Later
 with open("fragments.smi","a") as fragFile:
@@ -111,15 +114,19 @@ print("Optimizing Lead....")
 with open("optimizedLeads.smi","a") as leadFile:
     for frag in fragList:
         try:
-            newLead = rxnReversed.RunReactants([scaffold, frag])
-            for leads in newLead:
-                    try:
-                        Chem.SanitizeMol(leads)
-                        leadFile.write(Chem.MolToSmiles(leads) + "\n")
-                    except:
-                        pass
-        except:
-            pass
+		tempReactants = [frag, scaffold]
+		newLead = rxnReversed.RunReactants(tempReactants)
+		for leads in newLead:
+			for opLead in leads:
+                    		try:
+                        		Chem.SanitizeMol(opLead)
+                        		leadFile.write(Chem.MolToSmiles(opLead) + "\n")
+                    		except Exception as e:
+					print(e)
+                        		pass
+        except Exception as e:
+		print(e)
+           	pass
 
 
 # Outputing Optimized Leads
