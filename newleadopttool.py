@@ -21,29 +21,35 @@ import sys
 from sys import argv as arg
 
 # Reaction checker
-def validRxn(reactant, reaction):
+def validRxn(reactant, reaction, revRxn):
+	#print(reactant)
+	#print(reaction)
 	try:
 		product = None
 		product = reaction.RunReactants(reactant)
+		print("Reaction was tested...")
 		if(len(product) == 0):
+			print('product is none')
 			return None
 		else:
-			reverseReactionPlan = reactionPlan[reactionPlan.find('>>')+2:] + '>>' + reactionPlan[0:reactionPlan.find('>>')]
-			reverseReaction = AllChem.ReactionFromSmarts(reverseReactionPlan)
+			#reverseReactionPlan = reactionPlan[reactionPlan.find('>>')+2:] + '>>' + reactionPlan[0:reactionPlan.find('>>')]
+			#reverseReaction = AllChem.ReactionFromSmarts(reverseReactionPlan)
 			for prod in product:
 				try:
-					reactant = reverseReaction.RunReactants(prod)
+					reactant = revRxn.RunReactants(prod)
 					for pairs in reactant:
 						for molecule in pairs:
 							moleculeBit = FingerprintMols.FingerprintMol(molecule)
-							compoundBit= FingerprintMols.FingerprintMol(mol)
+							compoundBit= FingerprintMols.FingerprintMol()
 							similarity = DataStructs.FingerprintSimilarity(moleculeBit, compoundBit)
 							if(similarity == 1): # Rxn is valid b/c product and reverse product is found to be same
 								return prod
 				except:
 					pass
-		  	return None
-	except:
+		  	print("reactant not reformed")
+			return None
+	except Exception as e:
+		print("Overall error: "+ str(e))
 		return None
 
 # Lead
@@ -59,7 +65,9 @@ with open(arg[2],"r") as rxnFile:
     rxnReversed = Chem.AllChem.ReactionFromSmarts(rxnText[rxnText.find('>>')+2:] + '>>' + rxnText[0:rxnText.find('>>')])
     rxnFile.close()
 
-products = validRxn(lead, rxn)
+reactants = []
+reactants.append(lead)
+products = validRxn(reactants, rxn)
 
 if products is None:
 	print("Reaction not applicable to lead...")
@@ -82,7 +90,9 @@ fragList = []
 with open(arg[3],"r") as smallMolFile:
     for line in smallMolFile:
         tempMol = Chem.MolFromSmiles(line)
-        tempProducts = validRxn(tempMol, rxn)
+	reactants = []
+	reactants.append(tempMol)
+        tempProducts = validRxn(reactants, rxn)
         for products in tempProducts:
                 fragList.append(products)
 
@@ -104,7 +114,7 @@ print("Optimizing Lead....")
 with open("optimizedLeads.smi","a") as leadFile:
     for frag in fragList:
         try:
-            newLead = rxnReversed.RunReactants((scaffold, frag),rxnReversed)
+            newLead = rxnReversed.RunReactants([scaffold, frag],rxnReversed)
             for leads in newLead:
                     try:
                         Chem.SanitizeMol(leads)
