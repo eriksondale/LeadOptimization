@@ -49,7 +49,7 @@ def validRxn(reactant, reaction):
 # Lead
 with open(arg[1],"r") as leadFile:
     lead = Chem.MolFromSmiles(leadFile.read())
-    AllChem.SanitizeMol(lead)
+    #AllChem.SanitizeMol(lead)
     leadFile.close()
 
 # Rxn
