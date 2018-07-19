@@ -13,7 +13,7 @@ from rdkit.Chem.Fingerprints import FingerprintMols
 from rdkit import DataStructs
 
 leadFile = open(arg[1],"r")
-for line in leadFile
+for line in leadFile:
     tempMol = Chem.MolFromSmiles(line.strip("\n"))
-    if(Descriptors.MolWt(tempMol, 0) < 500)
+    if(Descriptors.MolWt(tempMol, 0) <= 500):
         print(Chem.MolToSmiles(tempMol))
