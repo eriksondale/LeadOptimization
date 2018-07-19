@@ -29,15 +29,15 @@ def validRxn(reactant, reaction, revRxn):
 		product = reaction.RunReactants(reactant)
 		print("Reaction was tested...")
 		if(len(product) == 0):
-			print('product is none')
+			print('Product is None')
 			return None
 		else:
 			#reverseReactionPlan = reactionPlan[reactionPlan.find('>>')+2:] + '>>' + reactionPlan[0:reactionPlan.find('>>')]
 			#reverseReaction = AllChem.ReactionFromSmarts(reverseReactionPlan)
 			for prod in product:
 				try:
-					reactant = revRxn.RunReactants(prod)
-					for pairs in reactant:
+					revReactant = revRxn.RunReactants(prod)
+					for pairs in revReactant:
 						for molecule in pairs:
 							for mol in reactant:
 								moleculeBit = FingerprintMols.FingerprintMol(molecule)
@@ -56,14 +56,15 @@ def validRxn(reactant, reaction, revRxn):
 # Lead
 with open(arg[1],"r") as leadFile:
     lead = Chem.MolFromSmiles(leadFile.read())
-    #AllChem.SanitizeMol(lead)
     leadFile.close()
 
 # Rxn
 with open(arg[2],"r") as rxnFile:
     rxnText = rxnFile.read()
     rxn = Chem.AllChem.ReactionFromSmarts(rxnText)
+	print("Reacation: " + rxnText)
     rxnReversed = Chem.AllChem.ReactionFromSmarts(rxnText[rxnText.find('>>')+2:] + '>>' + rxnText[0:rxnText.find('>>')])
+	print("Reversed Reaction: " + rxnText[rxnText.find('>>')+2:] + '>>' + rxnText[0:rxnText.find('>>')])
     rxnFile.close()
 
 reactants = []
