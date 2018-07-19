@@ -39,13 +39,13 @@ def validRxn(reactant, reaction, revRxn):
 					reactant = revRxn.RunReactants(prod)
 					for pairs in reactant:
 						for molecule in pairs:
-							for mol in reactant
+							for mol in reactant:
 								moleculeBit = FingerprintMols.FingerprintMol(molecule)
-								compoundBit= FingerprintMols.FingerprintMol(lead)
+								compoundBit= FingerprintMols.FingerprintMol(mol)
 								similarity = DataStructs.FingerprintSimilarity(moleculeBit, compoundBit)
 								if(similarity == 1): # Rxn is valid b/c product and reverse product is found to be same
 									return prod
-					except:
+				except:
 					pass
 		  	print("reactant not reformed")
 			return None
