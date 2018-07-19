@@ -22,11 +22,9 @@ from sys import argv as arg
 
 # Reaction checker
 def validRxn(reactant, reaction, revRxn):
-	#print(reactant)
-	#print(reaction)
 	try:
 		product = None
-		product = reaction.RunReactants(reactant)
+		product = reaction.RunReactants([reactant])
 		print("Reaction was tested...")
 		if(len(product) == 0):
 			print('Product is None')
@@ -39,9 +37,8 @@ def validRxn(reactant, reaction, revRxn):
 					revReactant = revRxn.RunReactants(prod)
 					for pairs in revReactant:
 						for molecule in pairs:
-							for mol in reactant:
 								moleculeBit = FingerprintMols.FingerprintMol(molecule)
-								compoundBit= FingerprintMols.FingerprintMol(mol)
+								compoundBit= FingerprintMols.FingerprintMol(reactant)
 								similarity = DataStructs.FingerprintSimilarity(moleculeBit, compoundBit)
 								if(similarity == 1): # Rxn is valid b/c product and reverse product is found to be same
 									return prod
@@ -67,9 +64,7 @@ with open(arg[2],"r") as rxnFile:
 	print("Reversed Reaction: " + rxnText[rxnText.find('>>')+2:] + '>>' + rxnText[0:rxnText.find('>>')])
     rxnFile.close()
 
-reactants = []
-reactants.append(lead)
-products = validRxn(reactants, rxn, rxnReversed)
+products = validRxn(lead, rxn, rxnReversed)
 
 if products is None:
 	print("Reaction not applicable to lead...")
