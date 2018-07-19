@@ -17,7 +17,7 @@ from rdkit.Chem import Draw
 from rdkit.Chem import rdMolDescriptors
 from rdkit.Chem import Descriptors
 from rdkit.Chem import rdchem
-
+import sys
 from sys import argv as arg
 
 # Reaction checker
@@ -61,6 +61,10 @@ with open(arg[2],"r") as rxnFile:
 
 products = validRxn(lead, rxn)
 
+if products is None:
+	print("Reaction not applicable to lead...")
+	sys.exit()
+
 # Scaffold
 scaffold = None
 for prods in products:
@@ -101,7 +105,7 @@ with open("optimizedLeads.smi","a") as leadFile:
     for frag in fragList:
         try:
             newLead = rxnReversed.RunReactants((scaffold, frag),rxnReversed)
-            for leads in newLead::
+            for leads in newLead:
                     try:
                         Chem.SanitizeMol(leads)
                         leadFile.write(Chem.MolToSmiles(leads) + "\n")
