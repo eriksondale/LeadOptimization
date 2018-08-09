@@ -45,12 +45,12 @@ def validRxn(reactant, reaction, revRxn):
 								if(similarity == 1): # Rxn is valid b/c product and reverse product is found to be same
 									return prod
 				except Exception as e:
-					print(e)
+					#print(e)
 					pass
-		  	print("reactant not reformed")
+		  	#print("reactant not reformed")
 			return None
 	except Exception as e:
-		print("Overall error: "+ str(e))
+		#print("Overall error: "+ str(e))
 		return None
 
 # Lead
@@ -61,7 +61,6 @@ with open(arg[1],"r") as leadFile:
 # Rxn
 with open(arg[2],"r") as rxnFile:
     rxnText = rxnFile.read()
-    rxnText = rxnText.strip('\n')
     rxn = Chem.AllChem.ReactionFromSmarts(rxnText)
     print("Reaction: " + rxnText)
     rxnReversed = Chem.AllChem.ReactionFromSmarts(rxnText[rxnText.find('>>')+2:] + '>>' + rxnText[0:rxnText.find('>>')])
