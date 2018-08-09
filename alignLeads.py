@@ -3,7 +3,7 @@ from sys import argv as arg
 from rdkit import Chem
 from rdkit.Chem import AllChem
 from rdkit.Chem import Draw,PyMol,MCS
-from rdkit.Chem.Draw import IPythonConsole
+#from rdkit.Chem.Draw import IPythonConsole
 from rdkit import rdBase
 
 if(len(arg)!=3):
@@ -22,5 +22,8 @@ else:
     core = AllChem.DeleteSubstructs(AllChem.ReplaceSidechains(Chem.RemoveHs(lead),p),Chem.MolFromSmiles('*'))
     core.UpdatePropertyCache()
     for mol in optSuppl:
-        AllChem.ConstrainedEmbed(mol, core)
-        w.write(mol)
+        try:
+            AllChem.ConstrainedEmbed(mol, core)
+            w.write(mol)
+        except:
+            pass
